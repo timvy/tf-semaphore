@@ -24,11 +24,11 @@ resource "semaphoreui_project_repository" "tf-semaphore" {
   ssh_key_id = semaphoreui_project_key.github.id
 }
 
-resource "semaphoreui_project_inventory" "homelab" {
+resource "semaphoreui_project_inventory" "base" {
   project_id          = semaphoreui_project.base.id
-  name                = "homelab"
+  name                = "base"
   terraform_workspace = {
-    workspace = "homelab"
+    workspace = "base"
   }
   ssh_key_id          = semaphoreui_project_key.github.id
 }
@@ -49,9 +49,9 @@ data "bitwarden_secret" "semaphore_api_admin" {
   key = "semaphore_api_admin"
 }
 
-resource "semaphoreui_project_environment" "homelab" {
+resource "semaphoreui_project_environment" "base" {
   project_id  = semaphoreui_project.base.id
-  name        = "homelab"
+  name        = "base"
   secrets = [{
     name  = "BWS_ACCESS_TOKEN"
     type  = "env"
@@ -80,13 +80,13 @@ resource "semaphoreui_project_environment" "homelab" {
   ]
 }
 
-resource "semaphoreui_project_template" "homelab" {
+resource "semaphoreui_project_template" "base" {
   allow_override_args_in_task = true
-  name                        = "homelab"
+  name                        = "base"
   project_id                  = semaphoreui_project.base.id
   app                         = "tofu"
-  environment_id              = semaphoreui_project_environment.homelab.id
-  inventory_id                = semaphoreui_project_inventory.homelab.id
-  playbook                    = "homelab"
+  environment_id              = semaphoreui_project_environment.base.id
+  inventory_id                = semaphoreui_project_inventory.base.id
+  playbook                    = "base"
   repository_id               = semaphoreui_project_repository.tf-semaphore.id
 }
