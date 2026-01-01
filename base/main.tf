@@ -24,11 +24,11 @@ resource "semaphoreui_project_repository" "tf-semaphore" {
   ssh_key_id = semaphoreui_project_key.github.id
 }
 
-resource "semaphoreui_project_inventory" "base" {
+resource "semaphoreui_project_inventory" "homelab" {
   project_id          = semaphoreui_project.base.id
-  name                = "base"
+  name                = "homelab"
   terraform_workspace = {
-    workspace = "base"
+    workspace = "homelab"
   }
   ssh_key_id          = semaphoreui_project_key.github.id
 }
@@ -49,9 +49,9 @@ data "bitwarden_secret" "semaphore_api_admin" {
   key = "semaphore_api_admin"
 }
 
-resource "semaphoreui_project_environment" "base" {
+resource "semaphoreui_project_environment" "homelab" {
   project_id  = semaphoreui_project.base.id
-  name        = "base"
+  name        = "homelab"
   secrets = [{
     name  = "BWS_ACCESS_TOKEN"
     type  = "env"
@@ -69,24 +69,28 @@ resource "semaphoreui_project_environment" "base" {
     type  = "env"
     value = data.bitwarden_secret.minio_s3_url.value
   },{
-    name = "SEMAPHOREUI_API_BASE_URL"
+    name = "SEMAPHOREUI_HOSTNAME"
     type = "env"
-    value = "http://localhost:3000/api"
+    value = "localhost"
   },{
     name = "SEMAPHOREUI_API_TOKEN"
     type = "env"
     value = data.bitwarden_secret.semaphore_api_admin.value
+  },{
+    name = "SEMAPHOREUI_PROTOCOL"
+    type = "env"
+    value = "http"
 } 
   ]
 }
 
-resource "semaphoreui_project_template" "base" {
+resource "semaphoreui_project_template" "homelab" {
   allow_override_args_in_task = true
-  name                        = "base"
+  name                        = "homelab"
   project_id                  = semaphoreui_project.base.id
   app                         = "tofu"
-  environment_id              = semaphoreui_project_environment.base.id
-  inventory_id                = semaphoreui_project_inventory.base.id
-  playbook                    = "base"
+  environment_id              = semaphoreui_project_environment.homelab.id
+  inventory_id                = semaphoreui_project_inventory.homelab.id
+  playbook                    = "homelab"
   repository_id               = semaphoreui_project_repository.tf-semaphore.id
 }
