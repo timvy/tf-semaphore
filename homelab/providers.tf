@@ -36,7 +36,4 @@ data "bitwarden_secret" "semaphore_api_admin" {
 }
 
 provider "semaphoreui" {
-  hostname  = "lxc-semaphore.${data.bitwarden_secret.domain_tailscale.value}"
-  port      = 443
-  api_token = data.bitwarden_secret.semaphore_api_admin.value
 }
