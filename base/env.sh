@@ -1,0 +1,5 @@
+bw_secrets=$(bws secret list --access-token $BWS_ACCESS_TOKEN )
+export AWS_ACCESS_KEY_ID=$(bws secret list --access-token $bw_access_token | jq -r '.[] | select(.key | startswith("minio_tf_access_key")) | .value')
+export AWS_SECRET_ACCESS_KEY=$(bws secret list --access-token $bw_access_token | jq -r '.[] | select(.key | startswith("minio_tf_secret")) | .value')
+export AWS_ENDPOINT_URL_S3=$(bws secret list --access-token $bw_access_token | jq -r '.[] | select(.key | startswith("minio_s3_url")) | .value')
+export SEMAPHOREUI_API_TOKEN=$(bws secret list --access-token $bw_access_token | jq -r '.[] | select(.key | startswith("semaphore_api_admin")) | .value')
