@@ -10,6 +10,7 @@ data "bitwarden_secret" "secret" {
   key = each.key
 }
 
+
 resource "semaphoreui_project_key" "ssh" {
   for_each = local.project_keys_ssh
 
@@ -63,8 +64,8 @@ resource "semaphoreui_project_template" "template" {
   allow_override_args_in_task = true
   app                         = lookup(each.value, "app", null)
   description                 = lookup(each.value, "description", null)
-  environment_id              = lookup(each.value, "environment", null) != null ? semaphoreui_project_environment.environment[each.value.environment].id : "0"
-  inventory_id                = lookup(each.value, "inventory", null) != null ? semaphoreui_project_inventory.inventory[each.value.inventory].id : "0"
+  environment_id              = lookup(each.value, "environment", null) != null ? semaphoreui_project_environment.environment[each.value.environment].id : semaphoreui_project_environment.environment["dummy"].id
+  inventory_id                = lookup(each.value, "inventory", null) != null ? semaphoreui_project_inventory.inventory[each.value.inventory].id : semaphoreui_project_inventory.inventory["dummy"].id
   name                        = each.key
   playbook                    = each.value.playbook
   project_id                  = semaphoreui_project.homelab.id

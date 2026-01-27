@@ -67,9 +67,21 @@ locals {
         workspace = "lxc"
       }
     }
+    dummy = {
+      name = "Dummy Inventory"
+      static = {
+        inventory = ""
+      }
+    }
   }
   # Variable groups
   environments = {
+    dummy = {
+      name        = "Dummy Environment"
+      variables   = {}
+      environment = {}
+      secrets     = []
+    }
     ansible_proxmox = {
       name        = "Proxmox Inventory"
       variables   = {}
@@ -197,10 +209,10 @@ locals {
       environment = "ansible_proxmox"
     }
     sc_ts_expiry = {
-      app         = "bash"
-      name        = "sc_ts_expiry"
-      playbook    = "tailscale-expiry.sh"
-      repository  = "scripts"
+      app        = "bash"
+      name       = "sc_ts_expiry"
+      playbook   = "tailscale-expiry.sh"
+      repository = "scripts"
       schedules = {
         daily = {
           cron_format = "0 0 * * *"
