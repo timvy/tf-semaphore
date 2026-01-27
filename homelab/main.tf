@@ -63,8 +63,8 @@ resource "semaphoreui_project_template" "template" {
   allow_override_args_in_task = true
   app                         = lookup(each.value, "app", null)
   description                 = lookup(each.value, "description", null)
-  environment_id              = semaphoreui_project_environment.environment[each.value.environment].id
-  inventory_id                = semaphoreui_project_inventory.inventory[each.value.inventory].id
+  environment_id              = lookup(each.value, "environment", null) != null ? semaphoreui_project_environment.environment[each.value.environment].id : "0"
+  inventory_id                = lookup(each.value, "inventory", null) != null ? semaphoreui_project_inventory.inventory[each.value.inventory].id : "0"
   name                        = each.key
   playbook                    = each.value.playbook
   project_id                  = semaphoreui_project.homelab.id

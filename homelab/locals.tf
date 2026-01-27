@@ -24,7 +24,7 @@ locals {
     }
     semaphore_homelab = {
       private_key = data.bitwarden_secret.secret["ssh_semaphore_homelab"].value
-      login        = "ansible"
+      login       = "ansible"
     }
   }
   repositories = {
@@ -36,6 +36,9 @@ locals {
     }
     terraform_homelab = {
       url = "git@github.com:timvy/terraform_homelab.git"
+    },
+    scripts = {
+      url = "git@github.com:timvy/scripts-semaphore.git"
     },
   }
   inventories = {
@@ -65,6 +68,7 @@ locals {
       }
     }
   }
+  # Variable groups
   environments = {
     ansible_proxmox = {
       name        = "Proxmox Inventory"
@@ -192,6 +196,17 @@ locals {
       inventory   = "ansible_inventory_proxmox"
       environment = "ansible_proxmox"
     }
+    sc_ts_expiry = {
+      app         = "bash"
+      name        = "sc_ts_expiry"
+      playbook    = "tailscale-expiry.sh"
+      repository  = "scripts"
+      schedules = {
+        daily = {
+          cron_format = "0 0 * * *"
+        }
+      }
+    }
     terraform_docker = {
       name        = "terraform_docker"
       description = "Terraform tasks for the docker homelab project"
@@ -216,7 +231,7 @@ locals {
         "-parallelism=1"
       ]
       schedules = {
-        tf_certs_weekly = {
+        weekly = {
           cron_format = "0 0 * * 0"
         }
       }

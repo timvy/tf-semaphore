@@ -8,8 +8,8 @@ terraform {
     }
   }
   backend "s3" {
-    bucket                      = "tofu-backend"
-    key                         = "terraform.tfstate"
+    bucket = "tofu-backend"
+    key    = "terraform.tfstate"
     # key                         = "env:/homelab/homelab/semaphore/terraform.tfstate"
     region                      = "main" # this is required, but will be skipped!
     skip_credentials_validation = true   # this will skip AWS related validation
