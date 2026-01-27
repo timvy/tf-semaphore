@@ -1,4 +1,76 @@
+# Common secrets that can be reused across environments
 locals {
+  # Common AWS/Minio secrets
+  aws_secrets = [
+    {
+      name  = "AWS_ACCESS_KEY_ID"
+      value = data.bitwarden_secret.secret["minio_tf_access_key"].value
+      type  = "env"
+    },
+    {
+      name  = "AWS_SECRET_ACCESS_KEY"
+      value = data.bitwarden_secret.secret["minio_tf_secret"].value
+      type  = "env"
+    },
+    {
+      name  = "AWS_ENDPOINT_URL_S3"
+      value = data.bitwarden_secret.secret["minio_s3_url"].value
+      type  = "env"
+    }
+  ]
+
+  # Common Tailscale secrets
+  tailscale_secrets = [
+    {
+      name  = "TAILSCALE_API_KEY"
+      value = data.bitwarden_secret.secret["tailscale_api_key"].value
+      type  = "env"
+    },
+    {
+      name  = "TAILSCALE_TAILNET"
+      value = data.bitwarden_secret.secret["tailscale_tailnet"].value
+      type  = "env"
+    }
+  ]
+
+  # Common Proxmox secrets (alternative naming for environments)
+  proxmox_secrets_tf = [
+    {
+      name  = "PM_USER"
+      value = data.bitwarden_secret.secret["proxmox_api_user"].value
+      type  = "env"
+    },
+    {
+      name  = "PM_PASS"
+      value = data.bitwarden_secret.secret["proxmox_api_password"].value
+      type  = "env"
+    },
+    {
+      name  = "PM_API_URL"
+      value = data.bitwarden_secret.secret["proxmox_api_url"].value
+      type  = "env"
+    }
+  ]
+
+  # Splunk secrets
+  splunk_secrets = [
+    {
+      name  = "SPLUNK_URL"
+      value = data.bitwarden_secret.secret["splunk_url"].value
+      type  = "env"
+    },
+    {
+      name  = "SPLUNK_USERNAME"
+      value = data.bitwarden_secret.secret["splunk_api_user"].value
+      type  = "env"
+    },
+    {
+      name  = "SPLUNK_PASSWORD"
+      value = data.bitwarden_secret.secret["splunk_api_password"].value
+      type  = "env"
+    }
+  ]
+
   bitwarden_secrets = [
     "bitwarden_auth_token",
     "bitwarden_client_id",
@@ -18,6 +90,7 @@ locals {
     "tailscale_api_key",
     "tailscale_tailnet"
   ]
+
   project_keys_ssh = {
     semaphore_github = {
       private_key = data.bitwarden_secret.secret["ssh_semaphore_github"].value
@@ -27,6 +100,7 @@ locals {
       login       = "ansible"
     }
   }
+
   repositories = {
     ansible_collection_homelab = {
       url = "git@github.com:timvy/ansible_collection_homelab.git"
@@ -36,11 +110,12 @@ locals {
     }
     terraform_homelab = {
       url = "git@github.com:timvy/terraform_homelab.git"
-    },
+    }
     scripts = {
       url = "git@github.com:timvy/scripts-semaphore.git"
-    },
+    }
   }
+
   inventories = {
     ansible_inventory_proxmox = {
       name = "Proxmox"
@@ -74,7 +149,8 @@ locals {
       }
     }
   }
-  # Variable groups
+
+  # Variable groups (environments)
   environments = {
     dummy = {
       name        = "Dummy Environment"
@@ -86,22 +162,26 @@ locals {
       name        = "Proxmox Inventory"
       variables   = {}
       environment = {}
-      secrets = [{
-        name  = "proxmox_host"
-        value = "pve-hpe.${data.bitwarden_secret.domain_tailscale.value}"
-        type  = "var"
-        }, {
-        name  = "PROXMOX_PASSWORD"
-        value = data.bitwarden_secret.secret["proxmox_api_password"].value
-        type  = "env"
-        }, {
-        name  = "PROXMOX_USER"
-        value = data.bitwarden_secret.secret["proxmox_api_user"].value
-        type  = "env"
-        }, {
-        name  = "PROXMOX_URL"
-        value = "https://pve-hpe.${data.bitwarden_secret.domain_tailscale.value}"
-        type  = "env"
+      secrets = [
+        {
+          name  = "proxmox_host"
+          value = "pve-hpe.${data.bitwarden_secret.domain_tailscale.value}"
+          type  = "var"
+        },
+        {
+          name  = "PROXMOX_PASSWORD"
+          value = data.bitwarden_secret.secret["proxmox_api_password"].value
+          type  = "env"
+        },
+        {
+          name  = "PROXMOX_USER"
+          value = data.bitwarden_secret.secret["proxmox_api_user"].value
+          type  = "env"
+        },
+        {
+          name  = "PROXMOX_URL"
+          value = "https://pve-hpe.${data.bitwarden_secret.domain_tailscale.value}"
+          type  = "env"
         }
       ]
     }
@@ -109,97 +189,38 @@ locals {
       name        = "Terraform Homelab"
       variables   = {}
       environment = {}
-      secrets = [{
-        name  = "AWS_ACCESS_KEY_ID"
-        value = data.bitwarden_secret.secret["minio_tf_access_key"].value
-        type  = "env"
-        }, {
-        name  = "AWS_SECRET_ACCESS_KEY"
-        value = data.bitwarden_secret.secret["minio_tf_secret"].value
-        type  = "env"
-        }, {
-        name  = "AWS_ENDPOINT_URL_S3"
-        value = data.bitwarden_secret.secret["minio_s3_url"].value
-        type  = "env"
-        }, {
-        name  = "BW_CLIENTID"
-        value = data.bitwarden_secret.secret["bitwarden_client_id"].value
-        type  = "env"
-        }, {
-        name  = "BW_CLIENTSECRET"
-        value = data.bitwarden_secret.secret["bitwarden_client_secret"].value
-        type  = "env"
-        }, {
-        name  = "BW_PASSWORD"
-        value = data.bitwarden_secret.secret["bitwarden_password"].value
-        type  = "env"
-        }, {
-        name  = "TAILSCALE_API_KEY"
-        value = data.bitwarden_secret.secret["tailscale_api_key"].value
-        type  = "env"
-        }, {
-        name  = "TAILSCALE_TAILNET"
-        value = data.bitwarden_secret.secret["tailscale_tailnet"].value
-        type  = "env"
+      secrets = concat(local.aws_secrets, [
+        {
+          name  = "BW_CLIENTID"
+          value = data.bitwarden_secret.secret["bitwarden_client_id"].value
+          type  = "env"
+        },
+        {
+          name  = "BW_CLIENTSECRET"
+          value = data.bitwarden_secret.secret["bitwarden_client_secret"].value
+          type  = "env"
+        },
+        {
+          name  = "BW_PASSWORD"
+          value = data.bitwarden_secret.secret["bitwarden_password"].value
+          type  = "env"
         }
-      ]
+      ], local.tailscale_secrets)
     }
     terraform_homelab_bw = {
       name        = "Terraform Homelab with Bitwarden Secrets"
       variables   = {}
       environment = {}
-      secrets = [{
-        name  = "AWS_ACCESS_KEY_ID"
-        value = data.bitwarden_secret.secret["minio_tf_access_key"].value
-        type  = "env"
-        }, {
-        name  = "AWS_SECRET_ACCESS_KEY"
-        value = data.bitwarden_secret.secret["minio_tf_secret"].value
-        type  = "env"
-        }, {
-        name  = "AWS_ENDPOINT_URL_S3"
-        value = data.bitwarden_secret.secret["minio_s3_url"].value
-        type  = "env"
-        }, {
-        name  = "BWS_ACCESS_TOKEN"
-        value = data.bitwarden_secret.secret["bitwarden_auth_token"].value
-        type  = "env"
-        }, {
-        name  = "PM_USER"
-        value = data.bitwarden_secret.secret["proxmox_api_user"].value
-        type  = "env"
-        }, {
-        name  = "PM_PASS"
-        value = data.bitwarden_secret.secret["proxmox_api_password"].value
-        type  = "env"
-        }, {
-        name  = "PM_API_URL"
-        value = data.bitwarden_secret.secret["proxmox_api_url"].value
-        type  = "env"
-        }, {
-        name  = "SPLUNK_URL"
-        value = data.bitwarden_secret.secret["splunk_url"].value
-        type  = "env"
-        }, {
-        name  = "SPLUNK_USERNAME"
-        value = data.bitwarden_secret.secret["splunk_api_user"].value
-        type  = "env"
-        }, {
-        name  = "SPLUNK_PASSWORD"
-        value = data.bitwarden_secret.secret["splunk_api_password"].value
-        type  = "env"
-        }, {
-        name  = "TAILSCALE_API_KEY"
-        value = data.bitwarden_secret.secret["tailscale_api_key"].value
-        type  = "env"
-        }, {
-        name  = "TAILSCALE_TAILNET"
-        value = data.bitwarden_secret.secret["tailscale_tailnet"].value
-        type  = "env"
+      secrets = concat(local.aws_secrets, [
+        {
+          name  = "BWS_ACCESS_TOKEN"
+          value = data.bitwarden_secret.secret["bitwarden_auth_token"].value
+          type  = "env"
         }
-      ]
+      ], local.proxmox_secrets_tf, local.splunk_secrets, local.tailscale_secrets)
     }
   }
+
   templates = {
     ans_os_update = {
       name        = "ans_os_update"
@@ -261,5 +282,4 @@ locals {
       ]
     }
   }
-
 }
