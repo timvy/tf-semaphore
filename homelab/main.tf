@@ -24,7 +24,7 @@ resource "semaphoreui_project_key" "ssh" {
 }
 
 resource "semaphoreui_project_repository" "repositories" {
-  for_each = local.repositories
+  for_each = local.repositories_flat
 
   project_id = semaphoreui_project.homelab.id
   name       = each.key
@@ -38,7 +38,10 @@ resource "semaphoreui_project_inventory" "inventory" {
 
   project_id          = semaphoreui_project.homelab.id
   name                = each.value.name
-  file                = lookup(each.value, "file", null)
+  file                = lookup(each.value, "file", null) != null ? {
+    path          = each.value.file.path
+    repository_id = lookup(each.value, "repository", null) != null ? semaphoreui_project_repository.repositories[each.value.repository].id : null
+  } : null
   static              = lookup(each.value, "static", null)
   static_yaml         = lookup(each.value, "static_yaml", null)
   terraform_workspace = lookup(each.value, "terraform_workspace", null)

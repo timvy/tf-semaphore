@@ -104,24 +104,81 @@ locals {
   repositories = {
     ansible_collection_homelab = {
       url = "git@github.com:timvy/ansible_collection_homelab.git"
+      templates = {
+        ans_os_update = {
+          playbook    = "playbooks/os_update.yml"
+          inventory   = "ansible_inventory_proxmox"
+          environment = "ansible_proxmox"
+        }
+      }
     }
     ansible_inventory_homelab = {
       url = "git@github.com:timvy/ansible_inventory_homelab.git"
     }
     terraform_homelab = {
       url = "git@github.com:timvy/terraform_homelab.git"
+      templates = {
+        terraform_docker = {
+          app         = "tofu"
+          playbook    = "docker"
+          inventory   = "terraform_docker"
+          environment = "terraform_homelab"
+          arguments = [
+            "-parallelism=1"
+          ]
+        }
+        terraform_certificates = {
+          app         = "tofu"
+          playbook    = "certs"
+          inventory   = "terraform_certs"
+          environment = "terraform_homelab_bw"
+          arguments = [
+            "-parallelism=1"
+          ]
+          schedules = {
+            weekly = {
+              cron_format = "0 0 * * 0"
+            }
+          }
+        }
+      }
+    }
+    tf-proxmox-lxc = {
+      url = "git@github.com:timvy/tf-proxmox-lxc.git"
+      templates = {
+        terraform_LXC = {
+          app         = "tofu"
+          playbook    = "lxc"
+          inventory   = "terraform_lxc"
+          environment = "terraform_homelab_bw"
+          arguments = [
+            "-parallelism=1"
+          ]
+        }
+      }
     }
     scripts = {
       url = "git@github.com:timvy/scripts-semaphore.git"
+      templates = {
+        sc_ts_expiry = {
+          app      = "bash"
+          playbook = "tailscale-expiry.sh" 
+          schedules = {
+            daily = {
+              cron_format = "0 0 * * *"
+            }
+          }
+        }
+      }
     }
   }
 
   inventories = {
     ansible_inventory_proxmox = {
       name = "Proxmox"
+      repository = "ansible_inventory_homelab"
       file = {
-        path          = "inventory/proxmox.yml"
-        repository_id = semaphoreui_project_repository.repositories["ansible_inventory_homelab"].id
+        path = "inventory/proxmox.yml"
       }
     }
     terraform_docker = {
@@ -221,65 +278,10 @@ locals {
     }
   }
 
-  templates = {
-    ans_os_update = {
-      name        = "ans_os_update"
-      playbook    = "playbooks/os_update.yml"
-      repository  = "ansible_collection_homelab"
-      inventory   = "ansible_inventory_proxmox"
-      environment = "ansible_proxmox"
-    }
-    sc_ts_expiry = {
-      app        = "bash"
-      name       = "sc_ts_expiry"
-      playbook   = "tailscale-expiry.sh"
-      repository = "scripts"
-      schedules = {
-        daily = {
-          cron_format = "0 0 * * *"
-        }
-      }
-    }
-    terraform_docker = {
-      name        = "terraform_docker"
-      description = "Terraform tasks for the docker homelab project"
-      app         = "tofu"
-      playbook    = "docker"
-      repository  = "terraform_homelab"
-      inventory   = "terraform_docker"
-      environment = "terraform_homelab"
-      arguments = [
-        "-parallelism=1"
-      ]
-    }
-    terraform_certificates = {
-      name        = "terraform_certificates"
-      description = "Terraform tasks for the certificates homelab project"
-      app         = "tofu"
-      playbook    = "certs"
-      repository  = "terraform_homelab"
-      inventory   = "terraform_certs"
-      environment = "terraform_homelab_bw"
-      arguments = [
-        "-parallelism=1"
-      ]
-      schedules = {
-        weekly = {
-          cron_format = "0 0 * * 0"
-        }
-      }
-    }
-    terraform_LXC = {
-      name        = "terraform_lxc"
-      description = "Terraform tasks for the LXC homelab project"
-      app         = "tofu"
-      playbook    = "lxc"
-      repository  = "terraform_homelab"
-      inventory   = "terraform_lxc"
-      environment = "terraform_homelab_bw"
-      arguments = [
-        "-parallelism=1"
-      ]
-    }
-  }
+  # Flatten repositories for resource
+  repositories_flat = { for k, v in local.repositories : k => { url = v.url } }
+
+  # Flatten templates with repository added
+  templates = merge([for repo_key, repo in local.repositories : { for tpl_key, tpl in lookup(repo, "templates", {}) : tpl_key => merge(tpl, { repository = repo_key }) } ]...)
+
 }
