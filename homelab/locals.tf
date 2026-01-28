@@ -148,7 +148,7 @@ locals {
       templates = {
         terraform_LXC = {
           app         = "tofu"
-          playbook    = "lxc"
+          playbook    = "./"
           inventory   = "terraform_lxc"
           environment = "terraform_homelab_bw"
           arguments = [
