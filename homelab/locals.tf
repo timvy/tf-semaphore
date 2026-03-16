@@ -82,11 +82,14 @@ locals {
     "proxmox_api_password",
     "proxmox_api_url",
     "proxmox_api_user",
-    "ssh_semaphore_github",
-    "ssh_semaphore_homelab",
-    "splunk_url",
+    "pve_odr_01_api_password",
+    "pve_odr_01_api_url",
+    "pve_odr_01_api_user",
     "splunk_api_password",
     "splunk_api_user",
+    "splunk_url",
+    "ssh_semaphore_github",
+    "ssh_semaphore_homelab",
     "tailscale_api_key",
     "tailscale_tailnet"
   ]
@@ -105,10 +108,25 @@ locals {
     ansible_collection_homelab = {
       url = "git@github.com:timvy/ansible_collection_homelab.git"
       templates = {
-        ans_os_update = {
+        ans_os_update_hpe = {
           playbook    = "playbooks/os_update.yml"
           inventory   = "ansible_inventory_proxmox"
-          environment = "ansible_proxmox"
+          environment = "ansible_proxmox_hpe"
+        }
+        ans_os_update_odr = {
+          playbook    = "playbooks/os_update.yml"
+          inventory   = "ansible_inventory_proxmox"
+          environment = "ansible_proxmox_odr"
+        }
+        ans_firefly_exporter = {
+          playbook    = "playbooks/firefly_exporter.yml"
+          inventory   = "ansible_inventory_proxmox"
+          environment = "ansible_proxmox_odr"
+          schedules = {
+            daily = {
+              cron_format = "0 0 * * *"
+            }
+          }
         }
       }
     }
@@ -215,8 +233,8 @@ locals {
       environment = {}
       secrets     = []
     }
-    ansible_proxmox = {
-      name        = "Proxmox Inventory"
+    ansible_proxmox_hpe = {
+      name        = "ans-pve-hpe"
       variables   = {}
       environment = {}
       secrets = [
@@ -238,6 +256,33 @@ locals {
         {
           name  = "PROXMOX_URL"
           value = "https://pve-hpe.${data.bitwarden_secret.domain_tailscale.value}"
+          type  = "env"
+        }
+      ]
+    }
+    ansible_proxmox_odr = {
+      name        = "ans-pve-odr-01"
+      variables   = {}
+      environment = {}
+      secrets = [
+        {
+          name  = "proxmox_host"
+          value = "pve-odr-01.${data.bitwarden_secret.domain_tailscale.value}"
+          type  = "var"
+        },
+        {
+          name  = "PROXMOX_PASSWORD"
+          value = data.bitwarden_secret.secret["pve_odr_01_api_password"].value
+          type  = "env"
+        },
+        {
+          name  = "PROXMOX_USER"
+          value = data.bitwarden_secret.secret["pve_odr_01_api_user"].value
+          type  = "env"
+        },
+        {
+          name  = "PROXMOX_URL"
+          value = "https://pve-odr-01.${data.bitwarden_secret.domain_tailscale.value}"
           type  = "env"
         }
       ]
