@@ -180,7 +180,7 @@ locals {
       templates = {
         sc_ts_expiry = {
           app      = "bash"
-          playbook = "tailscale-expiry.sh" 
+          playbook = "tailscale-expiry.sh"
           schedules = {
             daily = {
               cron_format = "0 0 * * *"
@@ -193,10 +193,17 @@ locals {
 
   inventories = {
     ansible_inventory_proxmox = {
-      name = "Proxmox"
+      name       = "Proxmox"
       repository = "ansible_inventory_homelab"
       file = {
         path = "inventory/proxmox.yml"
+      }
+    }
+    ansible_inventory_tailscale = {
+      name       = "Tailscale"
+      repository = "ansible_inventory_homelab"
+      file = {
+        path = "inventory/ansible_tailscale_inventory.py"
       }
     }
     terraform_docker = {
@@ -327,6 +334,6 @@ locals {
   repositories_flat = { for k, v in local.repositories : k => { url = v.url } }
 
   # Flatten templates with repository added
-  templates = merge([for repo_key, repo in local.repositories : { for tpl_key, tpl in lookup(repo, "templates", {}) : tpl_key => merge(tpl, { repository = repo_key }) } ]...)
+  templates = merge([for repo_key, repo in local.repositories : { for tpl_key, tpl in lookup(repo, "templates", {}) : tpl_key => merge(tpl, { repository = repo_key }) }]...)
 
 }
